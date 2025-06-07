@@ -17,6 +17,15 @@ target_include_directories(
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR
+        CMAKE_SYSTEM_NAME STREQUAL "Windows")
+else ()
+    find_library(MATH m)
+    if(MATH)
+        target_link_libraries("${LIBRARY_NAME}" PUBLIC "${MATH}")
+    endif(MATH)
+endif ()
+
 set_target_properties(
         "${LIBRARY_NAME}"
         PROPERTIES
