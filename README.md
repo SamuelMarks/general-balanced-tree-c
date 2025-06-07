@@ -1,6 +1,6 @@
 general_balanced_tree_c
 =======================
-[![License](https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT%20OR%20CC0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT%20OR%20CC0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![.github/workflows/linux-Windows-macOS.yml](https://github.com/SamuelMarks/general-balanced-tree-c/actions/workflows/linux-Windows-macOS.yml/badge.svg)](https://github.com/SamuelMarks/general-balanced-tree-c/actions/workflows/linux-Windows-macOS.yml)
 
 General Balanced trees (from Arne Andersson).
 https://user.it.uu.se/~arneande/ps/gb.pdf
@@ -33,8 +33,9 @@ $ cmake --build 'build'
 
 ## License
 
-NOTE: 🤷 paper was from 26 years ago—before software licenses were popular—not sure what to do about this… the author also
-hasn't published in decades… so I'll just license super permissively below and hopefully that's ok ツ
+NOTE: 🤷 paper was from 26 years ago [code most likely from 1989]—before software licenses were popular—not sure what to
+do about this… the author also hasn't published in decades… so I'll just license super permissively below and hopefully
+that's ok ツ
 
 Licensed under any of:
 
