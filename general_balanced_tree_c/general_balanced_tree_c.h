@@ -146,8 +146,8 @@ extern GENERAL_BALANCED_TREE_C_EXPORT gbt_noderef gbt_insert(gbt_dictptr D,
                                                              gbt_ky_type key,
                                                              gbt_data_type in);
 
-extern GENERAL_BALANCED_TREE_C_EXPORT gbt_noderef lookup(gbt_dictptr D,
-                                                         gbt_ky_type key);
+extern GENERAL_BALANCED_TREE_C_EXPORT gbt_noderef gbt_lookup(gbt_dictptr D,
+                                                             gbt_ky_type key);
 
 extern GENERAL_BALANCED_TREE_C_EXPORT void gbt_delete(gbt_dictptr D,
                                                       gbt_ky_type key);

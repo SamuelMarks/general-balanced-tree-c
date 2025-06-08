@@ -37,7 +37,7 @@ int Go() {
     case 'i':
       scanf("%d%*[^\n]", &x);
       getchar();
-      temp = lookup(thedict, x);
+      temp = gbt_lookup(thedict, x);
       if (temp) {
         if (temp->key == x) {
           printf("No insertion, %d is already present.\n", x);
@@ -49,7 +49,7 @@ int Go() {
         gbt_Display(thedict->t, 0L);
         if (temp->key != x)
           printf("something is wrong.\n");
-        temp = lookup(thedict, x);
+        temp = gbt_lookup(thedict, x);
         if (temp->key != x)
           printf("something is wrong.\n");
       }
@@ -58,7 +58,7 @@ int Go() {
     case 'd':
       scanf("%d%*[^\n]", &x);
       getchar();
-      temp = lookup(thedict, x);
+      temp = gbt_lookup(thedict, x);
       if (!temp) {
         printf("Sorry, could not find %d\n", x);
       } else if (temp->key != x) {

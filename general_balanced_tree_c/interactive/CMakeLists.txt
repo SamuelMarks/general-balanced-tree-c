@@ -19,5 +19,5 @@ set_target_properties(
         "${EXEC_NAME}"
         PROPERTIES
         LINKER_LANGUAGE
-        GBT_C
+        C
 )

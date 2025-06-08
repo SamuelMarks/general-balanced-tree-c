@@ -187,7 +187,7 @@ gbt_noderef gbt_insert(gbt_dictptr D, gbt_ky_type key, gbt_data_type in) {
   return newnode;
 }
 
-gbt_noderef lookup(gbt_dictptr D, const gbt_ky_type key) {
+gbt_noderef gbt_lookup(gbt_dictptr D, const gbt_ky_type key) {
   gbt_noderef t = D->t;
   while (t) {
     if (GBT_KY_EQUAL(key, t->key))

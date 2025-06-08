@@ -16,15 +16,15 @@ https://user.it.uu.se/~arneande/ps/gb.pdf
 
 This codebase makes minor changes to https://user.it.uu.se/~arneande/abs/gbimpl.html in order to support:
 
-  - C23 (it broke many of the old K&R pre-C89 concepts)
-  - CMake build system
-  - Creating a library:
+- C23 (it broke many of the old K&R pre-C89 concepts)
+- CMake build system
+- Creating a library:
     - Guard macros
     - Carefully choose which symbols to export to shared library
     - Rename all symbols to be prefixed with `GBT` or `gbt`
-  - Separating test CLI into a separate `main.c` in its own `target`
-  - Minor bug fixes (out-of-bounds checks; `size_t` for size types; &etc.)
-  - Test suite (integrated into CTest)
+- Separating test CLI into a separate `main.c` in its own `target`
+- Minor bug fixes (out-of-bounds checks; `size_t` for size types; &etc.)
+- Test suite (integrated into CTest)
 
 (whilst retaining cross-platform support in C89)
 
@@ -34,6 +34,64 @@ This codebase makes minor changes to https://user.it.uu.se/~arneande/abs/gbimpl.
 $ cmake -DCMAKE_BUILD_TYPE='Debug' -S . -B 'build'
 $ cmake --build 'build'
 ```
+
+## Usage
+
+### Configuration
+
+```c
+/* Modify constants, types, and comparators                    */
+#define GBT_C          1.35 /* Other values could be used.     */
+                            /* as long as GBT_C > 1.           */
+#define GBT_MAXDEL     10   /* The number of deletions         */
+                            /* since last global rebalancing   */
+                            /* is at most than 10 times the    */
+                            /* tree weight.                    */
+                            /* (Other constant possible.)      */
+#define GBT_MAXHEIGHT   40  /* We assume GBT_C * log n < 40.   */
+                            /* Keep an eye on this one!        */
+#define GBT_SCREENWIDTH 40  /* For displaying tree.            */
+
+#define GBT_DATA_TYPE       /* or `#define GBT_DATA_TYPE long` */
+typedef long gbt_data_type;
+
+#define GBT_KY_ASSIGN(a, b) a = b
+
+#define GBT_KY_LESS(a, b) (a < b)
+
+#define GBT_KY_EQUAL(a, b) (a == b)
+
+#define GBT_IN_ASSIGN(a, b) a = b
+```
+
+These are all optional, and ↑ are the defaults.
+
+### Basics
+
+```c
+#include <assert.h>
+#include <stdlib.h>
+
+#include <general_balanced_tree_c.h>
+
+int main(void) {
+    const gbt_dictptr dict = construct_dict();
+    gbt_insert(dict, 55, 66); /* insert key `55` with value `66` */
+    {
+      const gbt_noderef needle = gbt_lookup(dict, 55);     /* find value of key `55` */
+      assert(needle != NULL);
+      assert(gbt_keyval(dict, needle) == 66);
+    }
+    gbt_delete(dict, 55);     /* delete key `55` */
+
+    return EXIT_SUCCESS;
+}
+```
+
+See [`test_general_balanced_tree_c.h`](general_balanced_tree_c/tests/test_general_balanced_tree_c.h) for more examples.
+
+See `extern GENERAL_BALANCED_TREE_C_EXPORT` prefixed symbols in [
+`general_balanced_tree_c.h`](general_balanced_tree_c/general_balanced_tree_c.h) for whole public API.
 
 ---
 

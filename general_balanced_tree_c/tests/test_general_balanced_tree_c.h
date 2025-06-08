@@ -9,7 +9,7 @@ extern "GBT_C" {
 #include <greatest.h>
 
 /* Helper to insert multiple keys, setting data = key */
-static void insert_keys(const gbt_dictptr dict, int keys[],
+static void insert_keys(const gbt_dictptr dict, const int keys[],
                         const size_t count) {
   size_t i;
   for (i = 0; i < count; i++) {
@@ -17,7 +17,7 @@ static void insert_keys(const gbt_dictptr dict, int keys[],
   }
 }
 
-/* Test insertion, lookup, and gbt_size */
+/* Test insertion, gbt_lookup, and gbt_size */
 TEST general_balanced_tree_insert_lookup_size(void) {
   const gbt_dictptr dict = construct_dict();
   ASSERT(dict != NULL);
@@ -30,14 +30,14 @@ TEST general_balanced_tree_insert_lookup_size(void) {
 
     size_t i;
     for (i = 0; i < 3; i++) {
-      gbt_noderef n = lookup(dict, keys[i]);
+      gbt_noderef n = gbt_lookup(dict, keys[i]);
       ASSERT(n != NULL);
       ASSERT(gbt_keyval(dict, n) == keys[i]);
       ASSERT(*gbt_infoval(dict, n) == keys[i]);
     }
 
     {
-      const gbt_noderef n = lookup(dict, 999);
+      const gbt_noderef n = gbt_lookup(dict, 999);
       ASSERT(n == NULL);
     }
   }
@@ -82,7 +82,7 @@ TEST general_balanced_tree_delete(void) {
     ASSERT(gbt_size(dict) == 3);
 
     {
-      const gbt_noderef n = lookup(dict, 15);
+      const gbt_noderef n = gbt_lookup(dict, 15);
       ASSERT(n == NULL);
     }
 
@@ -112,8 +112,8 @@ TEST general_balanced_tree_clear(void) {
     gbt_clear(dict);
     ASSERT(gbt_size(dict) == 0);
 
-    ASSERT(lookup(dict, 1) == NULL);
-    ASSERT(lookup(dict, 5) == NULL);
+    ASSERT(gbt_lookup(dict, 1) == NULL);
+    ASSERT(gbt_lookup(dict, 5) == NULL);
   }
 
   gbt_destruct_dict(dict);
@@ -135,7 +135,7 @@ TEST general_balanced_tree_perfect_balance(void) {
     {
       size_t i;
       for (i = 0; i < 7; i++) {
-        gbt_noderef n = lookup(dict, keys[i]);
+        gbt_noderef n = gbt_lookup(dict, keys[i]);
         ASSERT(n != NULL);
         ASSERT(gbt_keyval(dict, n) == keys[i]);
       }
@@ -173,7 +173,7 @@ TEST general_balanced_tree_large_insert_delete(void) {
 
   /* Check lookups */
   for (i = 0; i < 100; i++) {
-    const gbt_noderef n = lookup(dict, keys[i]);
+    const gbt_noderef n = gbt_lookup(dict, keys[i]);
     if (keys[i] % 10 == 0)
       ASSERT(n == NULL);
     else {
