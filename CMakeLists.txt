@@ -82,7 +82,13 @@ install(FILES
           "${CMAKE_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
         DESTINATION "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}")
 
-option(BUILD_EXEC "Build test executable" ON)
-if (BUILD_EXEC)
-    add_subdirectory("${PROJECT_NAME}/test")
-endif (BUILD_EXEC)
+option(BUILD_INTERACTIVE_EXEC "Build interactive executable" ON)
+if (BUILD_INTERACTIVE_EXEC)
+    add_subdirectory("${PROJECT_NAME}/interactive")
+endif (BUILD_INTERACTIVE_EXEC)
+
+include(CTest)
+if (CMAKE_PROJECT_NAME STREQUAL "${PROJECT_NAME}" AND BUILD_TESTING)
+    enable_testing()
+    add_subdirectory("${PROJECT_NAME}/tests")
+endif (CMAKE_PROJECT_NAME STREQUAL "${PROJECT_NAME}" AND BUILD_TESTING)

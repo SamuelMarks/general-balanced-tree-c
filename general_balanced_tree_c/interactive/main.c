@@ -1,16 +1,16 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <general_balanced_tree_c.h>
 
 void Help() {
-  printf("Write\n");
-  printf(" i x to insert integer x,\n");
-  printf(" d x to delete x,\n");
-  printf(" c to clear the tree,\n");
-  printf(" b to balance the entire tree,\n");
-  printf(" q to quit, \n");
-  printf(" ? to see this message. \n");
+  puts("Write\n"
+       " i x to insert integer x,\n"
+       " d x to delete x,\n"
+       " c to clear the tree,\n"
+       " b to balance the entire tree,\n"
+       " q to quit, \n"
+       " ? to see this message. \n");
 }
 
 /*-----------------------*/
@@ -18,10 +18,10 @@ void Help() {
 /*-----------------------*/
 
 int Go() {
-  dictptr thedict;
+  gbt_dictptr thedict;
   char command;
-  ky_type x;
-  noderef temp;
+  gbt_ky_type x;
+  gbt_noderef temp;
   const int rc = EXIT_SUCCESS;
 
   thedict = construct_dict();
@@ -45,8 +45,8 @@ int Go() {
         }
       }
       {
-        temp = insert(thedict, x, 0);
-        Display(thedict->t, 0L);
+        temp = gbt_insert(thedict, x, 0);
+        gbt_Display(thedict->t, 0L);
         if (temp->key != x)
           printf("something is wrong.\n");
         temp = lookup(thedict, x);
@@ -64,23 +64,23 @@ int Go() {
       } else if (temp->key != x) {
         printf("Sorry, could not find %d\n", x);
       } else {
-        delete(thedict, x);
-        Display(thedict->t, 0L);
+        gbt_delete(thedict, x);
+        gbt_Display(thedict->t, 0L);
       }
       break;
 
     case 'b':
       scanf("%*[^\n]");
       getchar();
-      PerfectBalance(&thedict->t, thedict->weight);
-      Display(thedict->t, 0L);
+      gbt_PerfectBalance(&thedict->t, thedict->weight);
+      gbt_Display(thedict->t, 0L);
       break;
 
     case 'c':
       scanf("%*[^\n]");
       getchar();
-      clear(thedict);
-      Display(thedict->t, 0L);
+      gbt_clear(thedict);
+      gbt_Display(thedict->t, 0L);
       break;
 
     case 'q':

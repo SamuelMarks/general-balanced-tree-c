@@ -1,9 +1,11 @@
-#include "general_balanced_tree_c.h"
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 
-static void leftrot(noderef *t) {
-  node *tmp;
+#include "general_balanced_tree_c.h"
+
+void leftrot(gbt_noderef *t) {
+  gbt_node *tmp;
 
   tmp = *t;
   *t = (*t)->right;
@@ -11,8 +13,8 @@ static void leftrot(noderef *t) {
   (*t)->left = tmp;
 }
 
-static void rightrot(noderef *t) {
-  node *tmp;
+void rightrot(gbt_noderef *t) {
+  gbt_node *tmp;
 
   tmp = *t;
   *t = (*t)->left;
@@ -20,7 +22,7 @@ static void rightrot(noderef *t) {
   (*t)->right = tmp;
 }
 
-static void Skew(noderef *t) {
+void Skew(gbt_noderef *t) {
   do {
     while ((*t)->left)
       rightrot(t);
@@ -28,22 +30,22 @@ static void Skew(noderef *t) {
   } while (*t);
 }
 
-static void oldSplit(noderef *t, long p1, long p2) {
+void oldSplit(gbt_noderef *t, long p1, long p2) {
   float tmp;
   long d;
 
-  tmp = (float)(p1 - p2) / p2;
+  tmp = (float)(p1 - p2) / (float)p2;
   for (d = 1; d <= p2; d++) {
-    if ((long)(d * tmp) > (long)((d - 1) * tmp))
+    if ((long)((float)d * tmp) > (long)(((float)d - 1) * tmp))
       leftrot(t);
     t = &(*t)->right;
   }
 }
 
-static void Split(noderef *t, long p1, long p2) {
-  long incr = p1 - p2;
-  long count = 0;
-  long i;
+void Split(gbt_noderef *t, const size_t p1, const size_t p2) {
+  const size_t incr = p1 - p2;
+  size_t count = 0;
+  size_t i;
 
   for (i = p2; i > 0; i--) {
     count += incr;
@@ -55,7 +57,7 @@ static void Split(noderef *t, long p1, long p2) {
   }
 }
 
-void PerfectBalance(noderef *t, long w) {
+void gbt_PerfectBalance(gbt_noderef *t, size_t w) {
   long b;
 
   Skew(t);
@@ -71,36 +73,39 @@ void PerfectBalance(noderef *t, long w) {
   }
 }
 
-long TreeWeight(noderef t) {
-  node *stack[maxheight];
+long gbt_TreeWeight(gbt_noderef t) {
+  gbt_node *stack[GBT_MAXHEIGHT];
   long top, w;
 
   w = 1;
-  NULLSTACK;
+  GBT_NULLSTACK;
   while (t) {
     while (t->left) {
       w++;
       if (t->right)
-        PUSH(t->right);
+        GBT_PUSH(t->right);
       t = t->left;
     }
     w++;
     if (!t->right)
-      POP(t)
+      GBT_POP(t)
     else
       t = t->right;
   }
   return w;
 }
 
-void FixBalance(dictptr D, ky_type key, long d1) {
+void gbt_FixBalance(gbt_dictptr D, gbt_ky_type key, long d1) {
   long d2;
-  noderef *p[maxheight + 1];
+  gbt_noderef *p[GBT_MAXHEIGHT + 1];
   long w;
+
+  if (d1 <= 1)
+    return;
 
   p[1] = &(D->t); /* a */
   for (d2 = 1; d2 < d1; d2++) {
-    if (KY_LESS(key, (*p[d2])->key))
+    if (GBT_KY_LESS(key, (*p[d2])->key))
       p[d2 + 1] = &(*p[d2])->left;
     else
       p[d2 + 1] = &(*p[d2])->right;
@@ -108,99 +113,101 @@ void FixBalance(dictptr D, ky_type key, long d1) {
   w = 2; /* b */
   do {
     d2--;
+    if (d2 < 1)
+      break;
     if (&(*p[d2])->left == p[d2 + 1])
-      w = w + TreeWeight((*p[d2])->right);
+      w = w + gbt_TreeWeight((*p[d2])->right);
     else
-      w = w + TreeWeight((*p[d2])->left);
-  } while (w >= minweight[d1 - d2 + 1]);
-  PerfectBalance(p[d2], w); /* c */
+      w = w + gbt_TreeWeight((*p[d2])->left);
+  } while (w >= gbt_minweight[d1 - d2 + 1]);
+  if (d2 >= 1)
+    gbt_PerfectBalance(p[d2], w); /* c */
 }
 
-void InitGlobal(void) {
+void gbt_InitGlobal(void) {
   long h;
 
-  for (h = 1; h <= maxheight; h++)
-    minweight[h] = (long)(exp((h - 1) / C * log(2.0)) + 0.5) + 1;
+  for (h = 1; h <= GBT_MAXHEIGHT; h++)
+    gbt_minweight[h] =
+        (long)(exp((double)(h - 1) / GBT_C * log(2.0)) + 0.5) + 1;
 }
 
-dictptr construct_dict() {
-  dictptr p;
+gbt_dictptr construct_dict() {
+  gbt_dictptr p;
 
-  InitGlobal();
-  p = (dictptr)malloc(sizeof(dict));
+  gbt_InitGlobal();
+  p = (gbt_dictptr)malloc(sizeof(gbt_dict));
   p->t = NULL;
   p->weight = 1;
   p->numofdeletions = 0;
   return p;
 }
 
-void CreateNode(ky_type x, data_type in, noderef *t) {
-  *t = (node *)malloc(sizeof(node));
-  KY_ASSIGN((*t)->key, x);
-  IN_ASSIGN((*t)->data, in);
+void gbt_CreateNode(gbt_ky_type x, gbt_data_type in, gbt_noderef *t) {
+  *t = (gbt_node *)malloc(sizeof(gbt_node));
+  GBT_KY_ASSIGN((*t)->key, x);
+  GBT_IN_ASSIGN((*t)->data, in);
   (*t)->left = NULL;
   (*t)->right = NULL;
 }
 
-void Display(noderef t, long depth) {
-  if ((t == NULL) || (depth > 8))
+void gbt_Display(gbt_noderef t, long depth) {
+  if (t == NULL || depth > 8)
     return;
-  Display(t->left, depth + 1);
-  printf("%*d\n", (int)(screenwidth - depth * 4 - 4), t->key);
-  Display(t->right, depth + 1);
+  gbt_Display(t->left, depth + 1);
+  printf("%*" KEY_TYPE_FMT "\n", (gbt_ky_type)(GBT_SCREENWIDTH - depth * 4 - 4),
+         t->key);
+  gbt_Display(t->right, depth + 1);
 }
 
-noderef insert(dictptr D, ky_type key, data_type in) {
+gbt_noderef gbt_insert(gbt_dictptr D, gbt_ky_type key, gbt_data_type in) {
   long d1;
-  noderef *candidate, *p, newnode;
+  gbt_noderef *candidate, *p, newnode;
 
   d1 = 1;
   p = &(D->t);
   candidate = NULL;
-  while (*p) { /* a */
-    if (KY_LESS(key, (*p)->key))
+  while (*p) {
+    if (GBT_KY_LESS(key, (*p)->key)) {
       p = &(*p)->left;
-    else {
-      candidate = p;
+    } else {
+      if (GBT_KY_EQUAL(key, (*p)->key))
+        candidate = p;
       p = &(*p)->right;
     }
     d1++;
   }
-  if (candidate && /* b */
-      (KY_EQUAL((*candidate)->key, key)))
+  if (candidate)
     return *candidate;
-  CreateNode(key, in, p); /* c */
+  gbt_CreateNode(key, in, p);
   newnode = *p;
   D->weight++;
-  if (D->weight < minweight[d1]) /* d */
-    FixBalance(D, key, d1);
+  if (D->weight < gbt_minweight[d1])
+    gbt_FixBalance(D, key, d1);
   return newnode;
 }
 
-noderef lookup(dictptr D, ky_type key) {
-  register noderef t, candidate;
-
-  t = D->t;
-  candidate = NULL; /* a */
+gbt_noderef lookup(gbt_dictptr D, const gbt_ky_type key) {
+  gbt_noderef t = D->t;
   while (t) {
-    if (KY_LESS(key, t->key))
+    if (GBT_KY_EQUAL(key, t->key))
+      return t;
+    else if (GBT_KY_LESS(key, t->key))
       t = t->left;
-    else {
-      candidate = t; /* b */
+    else
       t = t->right;
-    }
   }
-  return candidate; /* c */
+  return NULL;
 }
 
-void delete(dictptr D, ky_type key) {
-  noderef *candidate, *last, tmp, *t;
+void gbt_delete(gbt_dictptr D, const gbt_ky_type key) {
+  gbt_noderef *candidate, *last = NULL, tmp, *t;
 
   t = &(D->t);
   candidate = NULL;
   while (*t) {
     last = t;
-    if (KY_LESS(key, (*t)->key))
+    if (GBT_KY_LESS(key, (*t)->key))
       t = &(*t)->left;
     else {
       candidate = t;
@@ -208,7 +215,7 @@ void delete(dictptr D, ky_type key) {
     }
   }
   if (candidate && /* a */
-      (KY_EQUAL((*candidate)->key, key))) {
+      (GBT_KY_EQUAL((*candidate)->key, key))) {
     D->numofdeletions++;
     D->weight--;
     tmp = *last;
@@ -223,39 +230,39 @@ void delete(dictptr D, ky_type key) {
       *candidate = tmp;
     }
   }
-  if (D->numofdeletions > maxdel * D->weight /* d */
+  if (D->numofdeletions > GBT_MAXDEL * D->weight /* d */
       && D->weight > 3) {
-    PerfectBalance(&(D->t), D->weight);
+    gbt_PerfectBalance(&(D->t), D->weight);
     D->numofdeletions = 0;
   }
 }
 
-ky_type keyval(dictptr D, noderef item) {
-  return ((noderef)item)->key;
-} /*keyval*/
+gbt_ky_type gbt_keyval(gbt_dictptr D, gbt_noderef item) {
+  return ((gbt_noderef)item)->key;
+} /*gbt_keyval*/
 
-data_type *infoval(dictptr D, noderef item) {
-  return &((noderef)item)->data;
-} /*infoval*/
+gbt_data_type *gbt_infoval(gbt_dictptr D, gbt_noderef item) {
+  return &((gbt_noderef)item)->data;
+} /*gbt_infoval*/
 
-int size(dictptr D) { return D->weight - 1; } /*size*/
+size_t gbt_size(gbt_dictptr D) { return D->weight - 1; } /*gbt_size*/
 
-void ClearTree(noderef *t) {
+void gbt_ClearTree(gbt_noderef *t) {
   if (!*t)
     return;
-  ClearTree(&(*t)->right);
-  ClearTree(&(*t)->left);
+  gbt_ClearTree(&(*t)->right);
+  gbt_ClearTree(&(*t)->left);
   free(*t);
   *t = NULL;
 }
 
-void clear(dictptr D) {
-  ClearTree(&(D->t));
+void gbt_clear(gbt_dictptr D) {
+  gbt_ClearTree(&(D->t));
   D->weight = 1;
   D->numofdeletions = 0;
 } /*clear*/
 
-void destruct_dict(dictptr D) {
-  clear(D);
+void gbt_destruct_dict(gbt_dictptr D) {
+  gbt_clear(D);
   free(D);
 } /*destruct_dict */

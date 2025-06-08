@@ -16,9 +16,15 @@ https://user.it.uu.se/~arneande/ps/gb.pdf
 
 This codebase makes minor changes to https://user.it.uu.se/~arneande/abs/gbimpl.html in order to support:
 
-- C23 (it broke many of the old K&R pre-C89 concepts)
-- CMake build system
-- Creating a library (separating test CLI into a separate main.c in its own `target`)
+  - C23 (it broke many of the old K&R pre-C89 concepts)
+  - CMake build system
+  - Creating a library:
+    - Guard macros
+    - Carefully choose which symbols to export to shared library
+    - Rename all symbols to be prefixed with `GBT` or `gbt`
+  - Separating test CLI into a separate `main.c` in its own `target`
+  - Minor bug fixes (out-of-bounds checks; `size_t` for size types; &etc.)
+  - Test suite (integrated into CTest)
 
 (whilst retaining cross-platform support in C89)
 

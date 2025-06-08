@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: mkdir
+      - name: make build directory
         run: mkdir build
 
       - name: configure
@@ -28,3 +28,7 @@ jobs:
       - name: build
         working-directory: ./build
         run: cmake --build .
+
+      - name: test
+        working-directory: ./build
+        run: ctest -C 'Debug'

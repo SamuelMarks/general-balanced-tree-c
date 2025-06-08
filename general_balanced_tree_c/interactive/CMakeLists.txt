@@ -1,4 +1,5 @@
-set(EXEC_NAME "${PROJECT_NAME}_test")
+get_filename_component(EXEC_NAME "${CMAKE_CURRENT_SOURCE_DIR}" NAME)
+set(EXEC_NAME "${PROJECT_NAME}_${EXEC_NAME}")
 
 set(Source_Files "main.c")
 source_group("Source Files" FILES "${Source_Files}")
@@ -18,5 +19,5 @@ set_target_properties(
         "${EXEC_NAME}"
         PROPERTIES
         LINKER_LANGUAGE
-        C
+        GBT_C
 )
