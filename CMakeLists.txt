@@ -78,8 +78,8 @@ write_basic_package_version_file(
         COMPATIBILITY AnyNewerVersion
 )
 install(FILES
-          "${CMAKE_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-          "${CMAKE_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+        "${CMAKE_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+        "${CMAKE_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
         DESTINATION "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}")
 
 option(BUILD_INTERACTIVE_EXEC "Build interactive executable" ON)
@@ -87,8 +87,13 @@ if (BUILD_INTERACTIVE_EXEC)
     add_subdirectory("${PROJECT_NAME}/interactive")
 endif (BUILD_INTERACTIVE_EXEC)
 
+option(BUILD_TEST_README "Build README test" OFF)
+
 include(CTest)
 if (CMAKE_PROJECT_NAME STREQUAL "${PROJECT_NAME}" AND BUILD_TESTING)
     enable_testing()
     add_subdirectory("${PROJECT_NAME}/tests")
+    if (BUILD_TEST_README)
+        add_subdirectory("${PROJECT_NAME}/test_readme")
+    endif (BUILD_TEST_README)
 endif (CMAKE_PROJECT_NAME STREQUAL "${PROJECT_NAME}" AND BUILD_TESTING)

@@ -18,13 +18,13 @@ void Help() {
 /*-----------------------*/
 
 int Go() {
-  gbt_dictptr thedict;
+  struct gbt_dict *thedict;
   char command;
   gbt_ky_type x;
-  gbt_noderef temp;
+  struct gbt_node *temp;
   const int rc = EXIT_SUCCESS;
 
-  thedict = construct_dict();
+  thedict = gbt_construct_dict();
   Help();
   do {
     printf("treeweight %ld \n", thedict->weight);

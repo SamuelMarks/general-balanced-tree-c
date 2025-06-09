@@ -2,14 +2,14 @@
 #define TEST_GENERAL_BALANCED_TREE_C_H
 
 #ifdef __cplusplus
-extern "GBT_C" {
+extern "C" {
 #endif /* __cplusplus */
 
 #include <general_balanced_tree_c.h>
 #include <greatest.h>
 
 /* Helper to insert multiple keys, setting data = key */
-static void insert_keys(const gbt_dictptr dict, const int keys[],
+static void insert_keys(struct gbt_dict *const dict, const int keys[],
                         const size_t count) {
   size_t i;
   for (i = 0; i < count; i++) {
@@ -19,7 +19,7 @@ static void insert_keys(const gbt_dictptr dict, const int keys[],
 
 /* Test insertion, gbt_lookup, and gbt_size */
 TEST general_balanced_tree_insert_lookup_size(void) {
-  const gbt_dictptr dict = construct_dict();
+  struct gbt_dict *const dict = gbt_construct_dict();
   ASSERT(dict != NULL);
   ASSERT(gbt_size(dict) == 0);
 
@@ -30,14 +30,14 @@ TEST general_balanced_tree_insert_lookup_size(void) {
 
     size_t i;
     for (i = 0; i < 3; i++) {
-      gbt_noderef n = gbt_lookup(dict, keys[i]);
+      struct gbt_node *n = gbt_lookup(dict, keys[i]);
       ASSERT(n != NULL);
       ASSERT(gbt_keyval(dict, n) == keys[i]);
       ASSERT(*gbt_infoval(dict, n) == keys[i]);
     }
 
     {
-      const gbt_noderef n = gbt_lookup(dict, 999);
+      const struct gbt_node *n = gbt_lookup(dict, 999);
       ASSERT(n == NULL);
     }
   }
@@ -48,17 +48,17 @@ TEST general_balanced_tree_insert_lookup_size(void) {
 
 /* Test duplicate inserts don't overwrite */
 TEST general_balanced_tree_duplicate_insert(void) {
-  const gbt_dictptr dict = construct_dict();
+  struct gbt_dict *const dict = gbt_construct_dict();
   ASSERT(dict != NULL);
 
   {
-    gbt_noderef n1 = gbt_insert(dict, 42, 100);
+    struct gbt_node *n1 = gbt_insert(dict, 42, 100);
     ASSERT(n1 != NULL);
     ASSERT(gbt_keyval(dict, n1) == 42);
     ASSERT(*gbt_infoval(dict, n1) == 100);
 
     {
-      const gbt_noderef n2 = gbt_insert(dict, 42, 200);
+      struct gbt_node *const n2 = gbt_insert(dict, 42, 200);
       ASSERT(n2 == n1);                      /* should be same node */
       ASSERT(*gbt_infoval(dict, n2) == 100); /* data unchanged */
     }
@@ -70,7 +70,7 @@ TEST general_balanced_tree_duplicate_insert(void) {
 
 /* Test deletion of keys */
 TEST general_balanced_tree_delete(void) {
-  const gbt_dictptr dict = construct_dict();
+  struct gbt_dict *const dict = gbt_construct_dict();
   ASSERT(dict != NULL);
 
   {
@@ -82,7 +82,7 @@ TEST general_balanced_tree_delete(void) {
     ASSERT(gbt_size(dict) == 3);
 
     {
-      const gbt_noderef n = gbt_lookup(dict, 15);
+      const struct gbt_node *n = gbt_lookup(dict, 15);
       ASSERT(n == NULL);
     }
 
@@ -101,7 +101,7 @@ TEST general_balanced_tree_delete(void) {
 
 /* Test clear function */
 TEST general_balanced_tree_clear(void) {
-  const gbt_dictptr dict = construct_dict();
+  struct gbt_dict *const dict = gbt_construct_dict();
   ASSERT(dict != NULL);
 
   {
@@ -122,7 +122,7 @@ TEST general_balanced_tree_clear(void) {
 
 /* Test perfect balance on tree */
 TEST general_balanced_tree_perfect_balance(void) {
-  const gbt_dictptr dict = construct_dict();
+  struct gbt_dict *const dict = gbt_construct_dict();
   ASSERT(dict != NULL);
 
   {
@@ -135,7 +135,7 @@ TEST general_balanced_tree_perfect_balance(void) {
     {
       size_t i;
       for (i = 0; i < 7; i++) {
-        gbt_noderef n = gbt_lookup(dict, keys[i]);
+        struct gbt_node *n = gbt_lookup(dict, keys[i]);
         ASSERT(n != NULL);
         ASSERT(gbt_keyval(dict, n) == keys[i]);
       }
@@ -148,7 +148,7 @@ TEST general_balanced_tree_perfect_balance(void) {
 
 /* Test inserting many keys and deleting some at random */
 TEST general_balanced_tree_large_insert_delete(void) {
-  const gbt_dictptr dict = construct_dict();
+  struct gbt_dict *const dict = gbt_construct_dict();
   size_t i;
   int keys[100];
   ASSERT(dict != NULL);
@@ -173,7 +173,7 @@ TEST general_balanced_tree_large_insert_delete(void) {
 
   /* Check lookups */
   for (i = 0; i < 100; i++) {
-    const gbt_noderef n = gbt_lookup(dict, keys[i]);
+    struct gbt_node *const n = gbt_lookup(dict, keys[i]);
     if (keys[i] % 10 == 0)
       ASSERT(n == NULL);
     else {
