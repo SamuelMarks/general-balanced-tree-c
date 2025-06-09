@@ -2,6 +2,11 @@
 #include <stdlib.h>
 
 #include <general_balanced_tree_c.h>
+#ifdef _MSC_VER
+#define NUM_FMT "zu"
+#else
+#define NUM_FMT "ld"
+#endif
 
 void Help() {
   puts("Write\n"
@@ -27,7 +32,7 @@ int Go() {
   thedict = gbt_construct_dict();
   Help();
   do {
-    printf("treeweight %ld \n", thedict->weight);
+    printf("treeweight %" NUM_FMT " \n", thedict->weight);
     printf("Enter command, write ? for help.\n");
     command = getchar();
     if (command == '\n')
@@ -35,7 +40,18 @@ int Go() {
     switch (command) {
 
     case 'i':
+#if defined(_MSC_VER) && !defined(__INTEL_COMPILER) ||                         \
+    defined(__STDC_LIB_EXT1__) && __STDC_WANT_LIB_EXT1__
+    {
+      if (scanf_s("%d", &x) == 1) {
+        int ch;
+        while ((ch = getchar()) != '\n' && ch != EOF) {
+        }
+      }
+    }
+#else
       scanf("%d%*[^\n]", &x);
+#endif
       getchar();
       temp = gbt_lookup(thedict, x);
       if (temp) {
@@ -56,7 +72,18 @@ int Go() {
       break;
 
     case 'd':
+#if defined(_MSC_VER) && !defined(__INTEL_COMPILER) ||                         \
+    defined(__STDC_LIB_EXT1__) && __STDC_WANT_LIB_EXT1__
+    {
+      if (scanf_s("%d", &x) == 1) {
+        int ch;
+        while ((ch = getchar()) != '\n' && ch != EOF) {
+        }
+      }
+    }
+#else
       scanf("%d%*[^\n]", &x);
+#endif
       getchar();
       temp = gbt_lookup(thedict, x);
       if (!temp) {
@@ -70,14 +97,32 @@ int Go() {
       break;
 
     case 'b':
+#if defined(_MSC_VER) && !defined(__INTEL_COMPILER) ||                         \
+    defined(__STDC_LIB_EXT1__) && __STDC_WANT_LIB_EXT1__
+    {
+      int ch;
+      while ((ch = getchar()) != '\n' && ch != EOF) {
+      }
+    }
+#else
       scanf("%*[^\n]");
+#endif
       getchar();
       gbt_PerfectBalance(&thedict->t, thedict->weight);
       gbt_Display(thedict, thedict->t, 0L);
       break;
 
     case 'c':
+#if defined(_MSC_VER) && !defined(__INTEL_COMPILER) ||                         \
+    defined(__STDC_LIB_EXT1__) && __STDC_WANT_LIB_EXT1__
+    {
+      int ch;
+      while ((ch = getchar()) != '\n' && ch != EOF) {
+      }
+    }
+#else
       scanf("%*[^\n]");
+#endif
       getchar();
       gbt_clear(thedict);
       gbt_Display(thedict, thedict->t, 0L);
@@ -88,13 +133,31 @@ int Go() {
       break;
 
     case '?':
+#if defined(_MSC_VER) && !defined(__INTEL_COMPILER) ||                         \
+    defined(__STDC_LIB_EXT1__) && __STDC_WANT_LIB_EXT1__
+    {
+      int ch;
+      while ((ch = getchar()) != '\n' && ch != EOF) {
+      }
+    }
+#else
       scanf("%*[^\n]");
+#endif
       getchar();
       Help();
       break;
 
     default:
+#if defined(_MSC_VER) && !defined(__INTEL_COMPILER) ||                         \
+    defined(__STDC_LIB_EXT1__) && __STDC_WANT_LIB_EXT1__
+    {
+      int ch;
+      while ((ch = getchar()) != '\n' && ch != EOF) {
+      }
+    }
+#else
       scanf("%*[^\n]");
+#endif
       getchar();
       printf("I don''t understand.\n");
       printf("Write ? for help. \n");

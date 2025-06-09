@@ -11,7 +11,7 @@ extern "C" {
 /* Helper to insert multiple keys, setting data = key */
 static void insert_keys(struct gbt_dict *const dict, const int keys[],
                         const size_t count) {
-  size_t i;
+  int i;
   for (i = 0; i < count; i++) {
     gbt_insert(dict, keys[i], keys[i]);
   }
@@ -28,12 +28,14 @@ TEST general_balanced_tree_insert_lookup_size(void) {
     insert_keys(dict, keys, sizeof(keys) / sizeof(keys[0]));
     ASSERT(gbt_size(dict) == 3);
 
-    size_t i;
-    for (i = 0; i < 3; i++) {
-      struct gbt_node *n = gbt_lookup(dict, keys[i]);
-      ASSERT(n != NULL);
-      ASSERT(gbt_keyval(dict, n) == keys[i]);
-      ASSERT(*gbt_infoval(dict, n) == keys[i]);
+    {
+      size_t i;
+      for (i = 0; i < 3; i++) {
+        struct gbt_node *n = gbt_lookup(dict, keys[i]);
+        ASSERT(n != NULL);
+        ASSERT(gbt_keyval(dict, n) == keys[i]);
+        ASSERT(*gbt_infoval(dict, n) == keys[i]);
+      }
     }
 
     {
@@ -149,7 +151,7 @@ TEST general_balanced_tree_perfect_balance(void) {
 /* Test inserting many keys and deleting some at random */
 TEST general_balanced_tree_large_insert_delete(void) {
   struct gbt_dict *const dict = gbt_construct_dict();
-  size_t i;
+  int i;
   int keys[100];
   ASSERT(dict != NULL);
 
