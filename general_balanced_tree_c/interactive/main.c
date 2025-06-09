@@ -46,7 +46,7 @@ int Go() {
       }
       {
         temp = gbt_insert(thedict, x, 0);
-        gbt_Display(thedict->t, 0L);
+        gbt_Display(thedict, thedict->t, 0L);
         if (temp->key != x)
           printf("something is wrong.\n");
         temp = gbt_lookup(thedict, x);
@@ -65,7 +65,7 @@ int Go() {
         printf("Sorry, could not find %d\n", x);
       } else {
         gbt_delete(thedict, x);
-        gbt_Display(thedict->t, 0L);
+        gbt_Display(thedict, thedict->t, 0L);
       }
       break;
 
@@ -73,14 +73,14 @@ int Go() {
       scanf("%*[^\n]");
       getchar();
       gbt_PerfectBalance(&thedict->t, thedict->weight);
-      gbt_Display(thedict->t, 0L);
+      gbt_Display(thedict, thedict->t, 0L);
       break;
 
     case 'c':
       scanf("%*[^\n]");
       getchar();
       gbt_clear(thedict);
-      gbt_Display(thedict->t, 0L);
+      gbt_Display(thedict, thedict->t, 0L);
       break;
 
     case 'q':

@@ -4,6 +4,26 @@
 
 #include "general_balanced_tree_c.h"
 
+void gbt_default_key_assign(gbt_ky_type *dst, const gbt_ky_type src) {
+  *dst = src;
+}
+
+int gbt_default_key_less(const gbt_ky_type a, const gbt_ky_type b) {
+  return a < b;
+}
+
+int gbt_default_key_equal(const gbt_ky_type a, const gbt_ky_type b) {
+  return a == b;
+}
+
+void gbt_default_assign(gbt_data_type *dst, const gbt_data_type src) {
+  *dst = src;
+}
+
+void gbt_default_key_print(const gbt_ky_type key) {
+  printf("%d", key);
+}
+
 void leftrot(gbt_noderef *t) {
   gbt_node *tmp;
 
@@ -105,7 +125,7 @@ void gbt_FixBalance(gbt_dictptr D, gbt_ky_type key, long d1) {
 
   p[1] = &(D->t); /* a */
   for (d2 = 1; d2 < d1; d2++) {
-    if (GBT_KY_LESS(key, (*p[d2])->key))
+    if (D->key_less(key, (*p[d2])->key))
       p[d2 + 1] = &(*p[d2])->left;
     else
       p[d2 + 1] = &(*p[d2])->right;
@@ -132,32 +152,67 @@ void gbt_InitGlobal(void) {
         (long)(exp((double)(h - 1) / GBT_C * log(2.0)) + 0.5) + 1;
 }
 
-gbt_dictptr construct_dict() {
+gbt_dictptr construct_dict(void) {
+  return construct_dict_full(
+      gbt_default_key_assign,
+      gbt_default_key_less,
+      gbt_default_key_equal,
+      gbt_default_assign,
+      gbt_default_key_print);
+}
+
+gbt_dictptr construct_dict_full(gbt_ky_assign_func key_assign_func,
+                                gbt_ky_less_func key_less_than_func,
+                                gbt_ky_equal_func key_equal_func,
+                                gbt_assign_func assign_func,
+                                gbt_key_print_func key_print_func) {
   gbt_dictptr p;
 
   gbt_InitGlobal();
   p = (gbt_dictptr)malloc(sizeof(gbt_dict));
+  if (!p)
+    return NULL;
   p->t = NULL;
   p->weight = 1;
   p->numofdeletions = 0;
+
+  /* Store function pointers */
+  p->key_assign = key_assign_func == NULL ? gbt_default_key_assign : key_assign_func;
+  p->key_less = key_less_than_func == NULL? gbt_default_key_less : key_less_than_func;
+  p->key_equal = key_equal_func == NULL ? gbt_default_key_equal : key_equal_func;
+  p->assign = assign_func == NULL ? gbt_default_assign: assign_func;
+  p->key_print = key_print_func == NULL ? gbt_default_key_print: key_print_func;
+
   return p;
 }
 
-void gbt_CreateNode(gbt_ky_type x, gbt_data_type in, gbt_noderef *t) {
+
+void gbt_CreateNode(gbt_dictptr D, gbt_ky_type x, gbt_data_type in,
+                    gbt_noderef *t) {
   *t = (gbt_node *)malloc(sizeof(gbt_node));
-  GBT_KY_ASSIGN((*t)->key, x);
-  GBT_IN_ASSIGN((*t)->data, in);
+  if (!*t)
+    return;
+  D->key_assign(&(*t)->key, x);
+  D->assign(&(*t)->data, in);
   (*t)->left = NULL;
   (*t)->right = NULL;
 }
 
-void gbt_Display(gbt_noderef t, long depth) {
+void gbt_Display(gbt_dictptr D, gbt_noderef t, const long depth) {
   if (t == NULL || depth > 8)
     return;
-  gbt_Display(t->left, depth + 1);
-  printf("%*" KEY_TYPE_FMT "\n", (gbt_ky_type)(GBT_SCREENWIDTH - depth * 4 - 4),
-         t->key);
-  gbt_Display(t->right, depth + 1);
+  gbt_Display(D, t->left, depth + 1);
+
+  /* Print key with indent, then use the print function pointer */
+  {
+    const unsigned spaces = GBT_SCREENWIDTH - depth * 4 - 4;
+    unsigned i;
+    for (i = 0; i < spaces; ++i) putchar(' ');
+    D->key_print(t->key);
+    putchar('\n');
+  }
+
+  gbt_Display(D, t->right, depth + 1);
 }
 
 gbt_noderef gbt_insert(gbt_dictptr D, gbt_ky_type key, gbt_data_type in) {
@@ -168,10 +223,10 @@ gbt_noderef gbt_insert(gbt_dictptr D, gbt_ky_type key, gbt_data_type in) {
   p = &(D->t);
   candidate = NULL;
   while (*p) {
-    if (GBT_KY_LESS(key, (*p)->key)) {
+    if (D->key_less(key, (*p)->key)) {
       p = &(*p)->left;
     } else {
-      if (GBT_KY_EQUAL(key, (*p)->key))
+      if (D->key_equal(key, (*p)->key))
         candidate = p;
       p = &(*p)->right;
     }
@@ -179,10 +234,10 @@ gbt_noderef gbt_insert(gbt_dictptr D, gbt_ky_type key, gbt_data_type in) {
   }
   if (candidate)
     return *candidate;
-  gbt_CreateNode(key, in, p);
+  gbt_CreateNode(D, key, in, p);
   newnode = *p;
   D->weight++;
-  if (D->weight < gbt_minweight[d1])
+  if (D->weight < (size_t)(gbt_minweight[d1]))
     gbt_FixBalance(D, key, d1);
   return newnode;
 }
@@ -190,9 +245,9 @@ gbt_noderef gbt_insert(gbt_dictptr D, gbt_ky_type key, gbt_data_type in) {
 gbt_noderef gbt_lookup(gbt_dictptr D, const gbt_ky_type key) {
   gbt_noderef t = D->t;
   while (t) {
-    if (GBT_KY_EQUAL(key, t->key))
+    if (D->key_equal(key, t->key))
       return t;
-    else if (GBT_KY_LESS(key, t->key))
+    else if (D->key_less(key, t->key))
       t = t->left;
     else
       t = t->right;
@@ -207,7 +262,7 @@ void gbt_delete(gbt_dictptr D, const gbt_ky_type key) {
   candidate = NULL;
   while (*t) {
     last = t;
-    if (GBT_KY_LESS(key, (*t)->key))
+    if (D->key_less(key, (*t)->key))
       t = &(*t)->left;
     else {
       candidate = t;
@@ -215,7 +270,7 @@ void gbt_delete(gbt_dictptr D, const gbt_ky_type key) {
     }
   }
   if (candidate && /* a */
-      (GBT_KY_EQUAL((*candidate)->key, key))) {
+      (D->key_equal((*candidate)->key, key))) {
     D->numofdeletions++;
     D->weight--;
     tmp = *last;
@@ -229,12 +284,12 @@ void gbt_delete(gbt_dictptr D, const gbt_ky_type key) {
       free(*candidate);
       *candidate = tmp;
     }
-  }
+      }
   if (D->numofdeletions > GBT_MAXDEL * D->weight /* d */
       && D->weight > 3) {
     gbt_PerfectBalance(&(D->t), D->weight);
     D->numofdeletions = 0;
-  }
+      }
 }
 
 gbt_ky_type gbt_keyval(gbt_dictptr D, gbt_noderef item) {

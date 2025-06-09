@@ -51,17 +51,6 @@ $ cmake --build 'build'
 #define GBT_MAXHEIGHT   40  /* We assume GBT_C * log n < 40.   */
                             /* Keep an eye on this one!        */
 #define GBT_SCREENWIDTH 40  /* For displaying tree.            */
-
-#define GBT_DATA_TYPE       /* or `#define GBT_DATA_TYPE long` */
-typedef long gbt_data_type;
-
-#define GBT_KY_ASSIGN(a, b) a = b
-
-#define GBT_KY_LESS(a, b) (a < b)
-
-#define GBT_KY_EQUAL(a, b) (a == b)
-
-#define GBT_IN_ASSIGN(a, b) a = b
 ```
 
 These are all optional, and ↑ are the defaults.
@@ -71,18 +60,40 @@ These are all optional, and ↑ are the defaults.
 ```c
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
+#ifndef GBT_KEY_TYPE
+#define GBT_KEY_TYPE
+typedef const char* gbt_ky_type;
+#endif /* !GBT_KEY_TYPE */
 #include <general_balanced_tree_c.h>
 
+void my_key_print(const gbt_ky_type key) {
+  printf("%s", key);
+}
+
+void my_key_assign(gbt_ky_type *dst, const gbt_ky_type src) {
+  *dst = strdup(src);
+}
+
 int main(void) {
-    const gbt_dictptr dict = construct_dict();
-    gbt_insert(dict, 55, 66); /* insert key `55` with value `66` */
+    /* const gbt_dictptr dict = construct_dict();
+       // this default dict is int->int ^
+    */
+
+    const gbt_dictptr dict = return construct_dict_full(
+      my_key_assign,
+      /*fallsback to default: gbt_default_key_less*/ NULL,
+      /*fallsback to default: gbt_default_key_equal*/ NULL,
+      /*fallsback to default: gbt_default_assign*/ NULL,
+      my_key_print);
+    gbt_insert(dict, "foo", "bar"); /* insert key `"foo"` with value `"bar"` */
     {
-      const gbt_noderef needle = gbt_lookup(dict, 55);     /* find value of key `55` */
+      const gbt_noderef needle = gbt_lookup(dict, "foo");  /* find value of key "foo" */
       assert(needle != NULL);
-      assert(gbt_keyval(dict, needle) == 66);
+      assert(strcmp(gbt_keyval(dict, needle), "bar") == 0);
     }
-    gbt_delete(dict, 55);     /* delete key `55` */
+    gbt_delete(dict, "foo");     /* delete key `"foo"` */
 
     return EXIT_SUCCESS;
 }
